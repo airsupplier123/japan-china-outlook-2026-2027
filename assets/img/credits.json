@@ -1,0 +1,58 @@
+{
+ "senkaku": {
+  "file": "assets/img/senkaku.jpg",
+  "title": "20100915Senkaku Islands Uotsuri Jima Kita Kojima Minami Kojima.jpg",
+  "artist": "BehBeh",
+  "license": "GFDL",
+  "license_url": "http://www.gnu.org/copyleft/fdl.html",
+  "source": "https://commons.wikimedia.org/wiki/File:20100915Senkaku_Islands_Uotsuri_Jima_Kita_Kojima_Minami_Kojima.jpg"
+ },
+ "diet": {
+  "file": "assets/img/diet.jpg",
+  "title": "National Diet Building - Tokyo, Japan - DSC06736.JPG",
+  "artist": "Daderot",
+  "license": "CC0",
+  "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "source": "https://commons.wikimedia.org/wiki/File:National_Diet_Building_-_Tokyo,_Japan_-_DSC06736.JPG"
+ },
+ "greathall": {
+  "file": "assets/img/greathall.jpg",
+  "title": "Great Hall of the People Beijing China.jpg",
+  "artist": "Philip Nalangan",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Great_Hall_of_the_People_Beijing_China.jpg"
+ },
+ "lugou": {
+  "file": "assets/img/lugou.jpg",
+  "title": "Thomas Child - Marco Polo Bridge (Lugou Qiao), Peking, 1877 NA01-75.jpg",
+  "artist": "Thomas Child (1841-1898)",
+  "license": "Public domain",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Thomas_Child_-_Marco_Polo_Bridge_(Lugou_Qiao),_Peking,_1877_NA01-75.jpg"
+ },
+ "shenzhen": {
+  "file": "assets/img/shenzhen.jpg",
+  "title": "Shenzhen Skyline from Futian District2.jpg",
+  "artist": "Huangdan2060",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Shenzhen_Skyline_from_Futian_District2.jpg"
+ },
+ "yonaguni": {
+  "file": "assets/img/yonaguni.jpg",
+  "title": "Yonaguni Island Aerial photograph.2012.jpg",
+  "artist": "国土地理院",
+  "license": "Attribution",
+  "license_url": "",
+  "source": "https://commons.wikimedia.org/wiki/File:Yonaguni_Island_Aerial_photograph.2012.jpg"
+ },
+ "coastguard": {
+  "file": "assets/img/coastguard.jpg",
+  "title": "PL 62, a Hateruma-class patrol vessel of the Japan Coast Guard.jpg",
+  "artist": "Chris Jantsch",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:PL_62,_a_Hateruma-class_patrol_vessel_of_the_Japan_Coast_Guard.jpg"
+ }
+}

@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fact-Check Card</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-tertiary: #f1f3f5;
+      --text: #1a1a1a;
+      --text-secondary: #495057;
+      --text-tertiary: #868e96;
+      --border: #dee2e6;
+      --border-light: #e9ecef;
+      --green: #16a34a;
+      --lime: #65a30d;
+      --yellow: #ca8a04;
+      --orange: #ea580c;
+      --red-orange: #dc2626;
+      --dark-red: #991b1b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --radius: 8px;
+      --radius-sm: 4px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a2e;
+        --bg-secondary: #16213e;
+        --bg-tertiary: #0f3460;
+        --text: #e8e8e8;
+        --text-secondary: #b0b0b0;
+        --text-tertiary: #808080;
+        --border: #2a2a4a;
+        --border-light: #222244;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg-secondary);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+    header, section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      padding: 20px;
+    }
+    h1, h2 { margin: 0 0 12px; line-height: 1.2; }
+    h1 { font-size: 28px; }
+    h2 { font-size: 20px; }
+    p { margin: 0 0 12px; }
+    a { color: inherit; }
+    .meta, .muted { color: var(--text-secondary); }
+    .badge, .tier, .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .badge-confirmed { background: var(--green); color: #fff; }
+    .badge-mostly-true { background: var(--lime); color: #fff; }
+    .badge-mixed { background: var(--yellow); color: #fff; }
+    .badge-unverified { background: var(--orange); color: #fff; }
+    .badge-misleading { background: var(--red-orange); color: #fff; }
+    .badge-false { background: var(--dark-red); color: #fff; }
+    .tier-1, .tier-2 { background: #dcfce7; color: #166534; }
+    .tier-3, .tier-4 { background: #dbeafe; color: #1e40af; }
+    .tier-5, .tier-6 { background: #fef9c3; color: #854d0e; }
+    .tier-7, .tier-8 { background: #fecaca; color: #991b1b; }
+    .pill { background: var(--bg-tertiary); color: var(--text-secondary); }
+    .verdict-line, .item-head, .score-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .item {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-top: 12px;
+      background: var(--bg-secondary);
+    }
+    details {
+      border-top: 1px solid var(--border-light);
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    summary { cursor: pointer; font-weight: 700; }
+    .score {
+      --score: 0;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--orange) calc(var(--score) * 1%), var(--bg-tertiary) 0);
+      flex: 0 0 auto;
+    }
+    .score span {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .compact, .spaced { margin: 0; padding-left: 20px; }
+    .spaced li { margin-bottom: 10px; }
+    dl {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 6px 12px;
+      margin: 0;
+    }
+    dt { color: var(--text-secondary); font-weight: 700; }
+    dd { margin: 0; }
+    blockquote {
+      margin: 0;
+      padding: 12px 14px;
+      border-left: 4px solid var(--border);
+      background: var(--bg-secondary);
+    }
+    @media (max-width: 520px) {
+      .container { padding: 12px 10px 32px; }
+      header, section { padding: 14px; }
+      h1 { font-size: 24px; }
+      dl { grid-template-columns: 1fr; }
+      .score-wrap { align-items: flex-start; }
+    }
+    @media print {
+      body { background: #fff; }
+      header, section { box-shadow: none; break-inside: avoid; }
+      details { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Fact-Check Card</h1>
+      <p class="meta">Mode: Standard | Date: 2026-10-30 | Language: zh-TW</p>
+      <p class="meta">Topic: 2026-2027 日中關係展望報告：摘要事實查核</p>
+    </header>
+    <section><h2>Original Content Summary</h2><p>查核 report.md 摘要中 22 項關於 2025–2026 年日中關係的事實主張，涵蓋外交、經濟脅迫、軍事事件、人員往來、日本國內政治與重要日程。</p></section>
+<section><h2>Overall Verdict</h2>
+                <div class="verdict-line">
+                  <span class="badge badge-mostly-true">Mostly true</span>
+                  <span class="confidence">Confidence: medium</span>
+                </div>
+                <p>22 項主張中，15 項屬實、7 項大致屬實，沒有錯誤或誤導的說法。有 4 項數字或表述已修正（訪日旅客人數、海警天數、岩屋的提議內容、安保文件時程），另有 3 項補註了不確定性。</p>
+                </section>
+<section><h2>MFS Score</h2>
+        <div class="score-wrap">
+          <div class="score" style="--score:17"><span>17</span></div>
+          <div>
+            <p class="muted">風險低：主張大多屬實，主要問題是部分來源屬於轉載，以及少數數字的精確度。</p>
+            <ul class="compact"><li><strong>CFS</strong>: 15/100</li><li><strong>MTS</strong>: 10/100</li><li><strong>SCD</strong>: 30/100</li></ul>
+          </div>
+        </div>
+        </section>
+<section><h2>Claims Breakdown</h2>
+            <article class="item">
+              <div class="item-head">
+                <strong>A1</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>高市首相 2025/11/7 在國會表示台灣有事可能構成「存立危機事態」，中方要求撤回</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>中方 11/13 正式要求撤回，高市迄今未撤回。</p>
+                <p class="muted">S1: NBC News：中方要求高市撤回發言</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>A2</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>2025/11 起無首腦／外長會談；岩屋 9/28 向王毅提議被拒</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>會談與拒絕屬實；提議內容是重申 1972 年聯合聲明精神，原稿寫成「四個政治文件」，已修正。「無會談」是依查無紀錄判斷。</p>
+                <p class="muted">S2: 共同社（秋田魁）：岩屋-王毅會談; S3: 中央社：岩屋談提議被拒（2026-10-07）</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>A3</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>中國 2025/11/19 再度暫停進口日本水產品</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>Reuters、Caixin 報導中方正式通知日方。</p>
+                <p class="muted">S4: Caixin：中國暫停進口日本水產品</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>A4</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>2026/1/6 商務部禁止對日本軍事用戶出口兩用物項</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>商務部 2026 年第 1 號公告，即時生效。</p>
+                <p class="muted">S5: Caixin：對日兩用物項禁令</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>A5</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>2/24 將 20 個日本實體列入管制清單；6/29 擴大，日方抗議</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>2 月：20 個實體列入管制清單、20 個列入關注清單。6/29：商務部第 27 號公告再增 20 個，日方當日抗議。累計總數各方報導不一。</p>
+                <p class="muted">S6: 時事通信社（Adnkronos）：日方抗議擴大禁令</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>A6</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>上半年受管制稀土對日出口年減 51%，鏑、鋱為零</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>-51% 有日經對中國海關資料的分析佐證；「全上半年為零」只部分證實，原文沒讀到。</p>
+                <p class="muted">S7: Caixin：日本面臨重稀土短缺</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>A7</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>富士電機兩名員工 5 月在大連被拘，6 月正式逮捕</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>時事通信社 6/25、7/1 報導。</p>
+                <p class="muted">S8: 時事通信社（nippon.com）：富士電機員工被拘</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B1</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>2026 年 1–9 月中國大陸訪日旅客年減 55.5%</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>共同社轉述 JNTO 資料；人數約 333 萬，原稿寫約 334 萬，已修正。</p>
+                <p class="muted">S9: 共同社（熊本日日）：JNTO 1–9 月訪日旅客統計</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B2</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>熊貓 2026/1/27 全數返華，為 1972 年以來首次無熊貓</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>AFP、時事通信社報導。</p>
+                <p class="muted">S10: 時事通信社（Adnkronos）：熊貓返華</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B3</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>2025/12/6 殲-15 對日本 F-15 進行火控雷達照射</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>日本防衛省公布，共兩次照射。</p>
+                <p class="muted">S11: AP：雷達照射事件</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B4</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>2025/12/9、2026/6/27 中俄聯合轟炸機巡航；7 月聯合海上巡航繞日</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>有日本統合幕僚監部官方公告。</p>
+                <p class="muted">S12: 日本統合幕僚監部：2026-07-30 中俄艦艇公告; S13: 日本統合幕僚監部：2025-12 中俄聯合飛行</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B5</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>2026 年上半年日本對華出口 +14.3%、自華進口 +15.7%</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>財務省速報數字，經環球時報轉述，總體數字有時事通信社佐證。</p>
+                <p class="muted">S14: 環球時報：日本上半年對華貿易</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B6</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>在華日企 10,118 家，是帝國資料庫 2010 年開始調查以來最低</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>帝國資料庫 9/28 發表，經 nippon.com、神戶新聞報導。</p>
+                <p class="muted">S15: nippon.com：在華日企家數（帝國資料庫）</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>B7</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>2025 年中國海警在釣魚台鄰接區 356–357 天</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>日本海上保安廳統計為 356 天，357 天是中方說法，已修正。</p>
+                <p class="muted">S16: Stars and Stripes：海警 2025 年 356 天</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C1</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>2026/2/8 眾院選舉自民黨單獨取得 316 席</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>多家媒體報導一致。</p>
+                <p class="muted">S17: nippon.com：2026 眾院選舉結果</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C2</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>時事通信社 10 月民調內閣支持率 42.4%，任內最低</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>10/15 發布；其他民調數字較高。</p>
+                <p class="muted">S18: 時事通信社（nippon.com）：支持率 42.4%</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C3</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>川普 5 月訪華、習近平 9 月訪美；川普勸習會見高市遭拒</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>訪問日期有官方確認；勸說一事來自 SCMP 匿名來源，時間點說法不一。</p>
+                <p class="muted">S19: 中國外交部：習近平訪美; S20: Japan Times：川普勸習會見高市</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C4</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>APEC 深圳 11/18–19；G20 邁阿密 12/14–15</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>APEC 日期有中國官方確認；G20 日期只有媒體報導。</p>
+                <p class="muted">S21: 深圳龍崗區政府：APEC 2026</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C5</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>安保三文件預定 2026 年 12 月由內閣通過</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>這是政府目標，自民黨與維新會的協商仍在進行，已改為「目標」。</p>
+                <p class="muted">S22: 時事通信社（Adnkronos）：自民黨通過安保文件提案</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C6</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>稀土新規暫緩期約 2026/11/10 到期</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>商務部、海關總署 2025 年第 70 號公告。</p>
+                <p class="muted">S23: Bloomberg：稀土新規暫緩正式化</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C7</strong>
+                <span class="badge badge-mostly-true">Mostly true</span>
+              </div>
+              <p>下屆中日韓峰會由日本主辦，中方拒絕定期</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>中方在 2025 年 11 月拒絕；2026 年現況未再證實。</p>
+                <p class="muted">S24: Korea Times：中方拒絕 1 月三方峰會</p>
+              </details>
+            </article>
+            
+            <article class="item">
+              <div class="item-head">
+                <strong>C8</strong>
+                <span class="badge badge-confirmed">Confirmed</span>
+              </div>
+              <p>二十一大預計 2027 年秋；2027/8/1 建軍百年</p>
+              <p class="muted">Type: factual</p>
+              <details>
+                <summary>Reasoning and sources</summary>
+                <p>建軍日期確定；大會日期是依慣例推估。</p>
+                <p class="muted">S25: Jamestown Foundation：2027 年建軍百年目標</p>
+              </details>
+            </article>
+            </section>
+
+<section><h2>Red Flags Detected</h2><ul class="spaced">
+        <li>
+          <strong>single_source - 單一或匿名來源</strong>
+          <span class="muted">(medium)</span><br>
+          「習近平拒絕會見高市」來自 SCMP 匿名消息來源，官方未證實。
+        </li>
+        
+        <li>
+          <strong>syndication - 轉載來源不獨立</strong>
+          <span class="muted">(low)</span><br>
+          多項佐證來自 nippon.com 或 Adnkronos 轉載時事通信社的報導，不能算作獨立的多重來源。
+        </li>
+        
+        <li>
+          <strong>state_media - 國家媒體作為數據來源</strong>
+          <span class="muted">(low)</span><br>
+          貿易與旅客數字部分轉引自環球時報，應以日本財務省、JNTO 原始資料核對。
+        </li>
+        </ul></section>
+<section><h2>Evidence Ledger</h2>
+            <article class="source item">
+              <div class="item-head">
+                <strong>S1. <a href="https://www.nbcnews.com/world/asia/china-urges-japan-pm-sanae-takaichi-retract-egregious-remarks-taiwan-rcna243649">NBC News：中方要求高市撤回發言</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 A1</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S2. <a href="https://www.sakigake.jp/news/article/20260928CO0140/">共同社（秋田魁）：岩屋-王毅會談</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 A2</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S3. <a href="https://cna.com.tw/news/aopl/202610070192.aspx">中央社：岩屋談提議被拒（2026-10-07）</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 A2</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S4. <a href="https://www.caixinglobal.com/2025-11-20/china-halts-japanese-seafood-imports-amid-diplomatic-row-102384739.html">Caixin：中國暫停進口日本水產品</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 A3</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S5. <a href="https://www.caixinglobal.com/2026-01-07/china-bans-exports-of-dual-use-items-to-japan-following-taiwan-remarks-102401228.html">Caixin：對日兩用物項禁令</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 A4</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S6. <a href="https://english.adnkronos.com/2026/06/29/japan-protests-chinas-expanded-export-ban-on-dual-use-goods/">時事通信社（Adnkronos）：日方抗議擴大禁令</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 A5</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S7. <a href="https://www.caixinglobal.com/2026-08-21/japan-faces-heavy-rare-earth-shortage-as-china-curbs-supply-102476428.html">Caixin：日本面臨重稀土短缺</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 A6</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S8. <a href="https://www.nippon.com/en/news/yjj2026062500561/">時事通信社（nippon.com）：富士電機員工被拘</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 A7</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S9. <a href="https://kumanichi.com/articles/2049017">共同社（熊本日日）：JNTO 1–9 月訪日旅客統計</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 B1</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S10. <a href="https://english.adnkronos.com/2026/01/27/last-2-pandas-in-japan-leave-for-china/">時事通信社（Adnkronos）：熊貓返華</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 B2</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S11. <a href="https://www.startribune.com/japan-protests-after-a-chinese-military-aircraft-locks-its-radar-on-japanese-jets/601541215">AP：雷達照射事件</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 B3</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S12. <a href="https://www.mod.go.jp/js/pdf/2026/p20260730_04e.pdf">日本統合幕僚監部：2026-07-30 中俄艦艇公告</a></strong>
+                <span class="tier tier-2">T2</span>
+              </div>
+              <p>佐證 B4</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S13. <a href="https://www.mod.go.jp/js/pdf/2025/p20251211_02e.pdf">日本統合幕僚監部：2025-12 中俄聯合飛行</a></strong>
+                <span class="tier tier-2">T2</span>
+              </div>
+              <p>佐證 B4</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S14. <a href="https://www.globaltimes.cn/page/202607/1366569.shtml">環球時報：日本上半年對華貿易</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 B5</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S15. <a href="https://www.nippon.com/ja/japan-data/h02916/">nippon.com：在華日企家數（帝國資料庫）</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 B6</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S16. <a href="https://www.stripes.com/theaters/asia_pacific/2026-01-05/senkaku-islands-china-coast-guard-20302589.html">Stars and Stripes：海警 2025 年 356 天</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 B7</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S17. <a href="https://www.nippon.com/en/japan-data/h02703/">nippon.com：2026 眾院選舉結果</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 C1</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S18. <a href="https://www.nippon.com/en/news/yjj2026101500705/">時事通信社（nippon.com）：支持率 42.4%</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 C2</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S19. <a href="https://www.mfa.gov.cn/eng/zy/jj/xjpdmgjxgsfw/202610/t20261010_12037643.html">中國外交部：習近平訪美</a></strong>
+                <span class="tier tier-2">T2</span>
+              </div>
+              <p>佐證 C3</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S20. <a href="https://www.japantimes.co.jp/news/2026/10/08/japan/trump-xi-urge-takaichi/">Japan Times：川普勸習會見高市</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 C3</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S21. <a href="https://www.lg.gov.cn/english/news/latestnews/content/post_12588327.html">深圳龍崗區政府：APEC 2026</a></strong>
+                <span class="tier tier-2">T2</span>
+              </div>
+              <p>佐證 C4</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S22. <a href="https://english.adnkronos.com/2026/06/09/ldp-adopts-proposal-on-revision-of-3-key-security-documents/">時事通信社（Adnkronos）：自民黨通過安保文件提案</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 C5</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S23. <a href="https://www.bloomberg.com/news/articles/2025-11-07/china-formalizes-rare-earth-curbs-suspension-after-trade-truce">Bloomberg：稀土新規暫緩正式化</a></strong>
+                <span class="tier tier-3">T3</span>
+              </div>
+              <p>佐證 C6</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>strong</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S24. <a href="https://www.koreatimes.co.kr/foreignaffairs/20251121/korea-japan-china-summit-in-january-rejected-by-china-as-beijing-tokyo-clash-over-taiwan">Korea Times：中方拒絕 1 月三方峰會</a></strong>
+                <span class="tier tier-6">T6</span>
+              </div>
+              <p>佐證 C7</p>
+              <dl>
+                <dt>Site</dt><dd>credible-limited</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            
+            <article class="source item">
+              <div class="item-head">
+                <strong>S25. <a href="https://jamestown.org/chinas-2027-goal-marks-the-plas-centennial-not-an-expedited-military-modernization/">Jamestown Foundation：2027 年建軍百年目標</a></strong>
+                <span class="tier tier-5">T5</span>
+              </div>
+              <p>佐證 C8</p>
+              <dl>
+                <dt>Site</dt><dd>established</dd>
+                <dt>Evidence</dt><dd>moderate</dd>
+                <dt>Author</dt><dd>not specified</dd>
+                <dt>Access</dt><dd>full or not specified</dd>
+              </dl>
+            </article>
+            </section>
+<section><h2>Educational Notes</h2><ul class="spaced"><li>分辨「查無紀錄」與「有證據否定」：例如「無外長會談」是依查無紀錄判斷。</li><li>同一則時事通信社報導被多個網站轉載，只算一個來源。</li><li>情境機率是分析者的主觀估計，不是可以查核的事實。</li></ul></section>
+<section><h2>Share-Safe Summary</h2><blockquote>這份 2026–2027 日中關係報告的摘要經逐條查核，22 項重要事實都獲得佐證。少數數字已依官方統計修正（例如中國海警 2025 年在釣魚台鄰接區出現 356 天）；「習近平拒絕會見高市」等說法目前只有匿名來源，應視為報導而非定論。</blockquote></section>
+<section><h2>Disclaimer</h2><p class="muted">本查核由 AI 輔助完成，依據 2026-10-30 可存取的公開資料；部分付費或受阻的原文沒有讀到。情境預測與機率不屬於查核範圍，請勿作為決策的唯一依據。</p></section>
+  </main>
+</body>
+</html>
